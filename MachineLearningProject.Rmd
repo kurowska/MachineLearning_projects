@@ -1,0 +1,220 @@
+---
+title: "Prediction of excercise quality based on personal activity data"
+author: "Julia Hoffman"
+date: "5/9/2017"
+output: 
+    md_document:
+       variant: markdown_github
+---
+
+```{r setup, include=FALSE}
+rm(list=ls())
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(caret)
+library(cvTools)
+library(gbm)
+library(plyr)
+library(randomForest)
+```
+
+## Summary
+
+With the use of devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity. These devices are part of the quantified self movement – people who take measurements about themselves regularly to improve their health and/or to find patterns in their behavior. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. The goal of this project is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants to predict how well they do the excercises. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. 
+
+More information about this data is available from the website here: <http://groupware.les.inf.puc-rio.br/har> (section on the Weight Lifting Exercise Dataset). The data for this project also come from this site.
+
+## Data Preprocessing
+
+```{r, load_data}
+trainUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testUrl  <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+trainFile <- "pml-training.csv"
+testFile  <- "pml-testing.csv"
+
+if (!file.exists(trainFile)) {
+  download.file(trainUrl, destfile=trainFile, method="curl")
+}
+if (!file.exists(testFile)) {
+  download.file(testUrl, destfile=testFile, method="curl")
+}
+
+training <- read.csv(file = trainFile, header = TRUE, sep = ",")
+testing  <- read.csv(file = testFile, header = TRUE, sep = ",")
+
+dim(training); dim(testing)
+```
+
+The training file contains 19622 observations of 160 variables, while the test 
+file has 20 observations of 160 variables.
+Closer look at training data reveals that there are a lot of NA values in a 
+number of columns. We check now how many rows in each column are affected, to 
+see if it's better to remove observations, or the variables.
+
+```{r, na_check}
+training_na <- training[, colSums(is.na(training)) != 0]
+na_count <-sapply(training_na, function(na) sum(is.na(na)))
+na_count <- data.frame(na_count)
+```
+
+The 67 columns that have NA values contain almost only NA values (this check is 
+not shown here). In each case 19216 observations (98% of the training sample) are NA, therefore these variables will be deleted. Additionally, first 7 colums of data are not useful for predictions, they will be removed as well. Out of remaining variables there are still a few which are empty, they will also be removed. This leaves the training sample with 53 predictors.
+
+```{r, cleaning}
+trainingData <- training[, colSums(is.na(training)) == 0]#removing variables with NA
+trainingData <- trainingData[ ,-c(1:7)]#removing irrelevant/empty variables
+classe <- trainingData$classe
+trainingData <- trainingData[, sapply(trainingData, is.numeric)]
+trainingData$classe <- classe
+
+testingData <- testing[, colSums(is.na(testing)) == 0]
+testingData <- testingData[ ,-c(1:7)]
+testingData <- testingData[, sapply(testingData, is.numeric)]
+
+dim(trainingData); dim(testingData)
+```
+
+The training set will be divided now into train and validation samples, to help
+model selection.
+
+```{r, train_n_test}
+inTrain <- createDataPartition(y = trainingData$classe, p = 0.7, list = FALSE)
+trainSub <- trainingData[inTrain,]
+validSub <- trainingData[-inTrain,]
+```
+
+## Prediction model evaluation
+
+We consider here classification trees (`rpart`), random forests (`rf`), and 
+boosted regression (`gbm`) models. The cross validation is done by `cv` method 
+in the trainControl, for which 5-fold method was chosen.
+
+#### Classification trees (rpart)
+
+```{r, rpart}
+set.seed(123)
+trCtrl <- trainControl(method = 'cv', number = 5, summaryFunction = defaultSummary)
+grid_rpart <- expand.grid(cp = seq(0, 0.05, 0.005))#complexity parameter
+fit_rpart <- train(classe~., data = trainSub, method = 'rpart', trControl = trCtrl,tuneGrid = grid_rpart)
+print(fit_rpart)
+plot(fit_rpart)
+###
+folds = createFolds(trainSub$classe, k = 5)
+error = rep(0, 5)
+for (k in 1:5) {
+    test = trainSub[unlist(folds[k]), ]
+    pred = predict(fit_rpart, test)
+    accuracy = sum(as.numeric(pred) == as.numeric(test$classe)) / length(pred)
+    error_k = 1 - accuracy
+    error[k] = error_k
+}
+error_rpart = round(mean(error)*100, digits = 2)
+```
+
+The out of sample error estimations for classification tree is **`r paste0(error_rpart,"%")`**. This is the weakest model of all considered.
+
+#### Boosted regression (gbm)
+
+```{r, gbm}
+set.seed(456)
+trCtrl <- trainControl(method = 'cv', number = 5, summaryFunction = defaultSummary)
+grid_gbm <- expand.grid( n.trees = seq(50, 200, 5), interaction.depth = c(10), shrinkage = c(0.1), n.minobsinnode = 20)
+fit_gbm <- train(classe~., data = trainSub, method = 'gbm', trControl = trCtrl, tuneGrid = grid_gbm, verbose = FALSE)
+print(fit_gbm)
+plot(fit_gbm)
+###
+folds = createFolds(trainSub$classe, k = 5)
+error = rep(0, 5)
+for (k in 1:5) {
+    test = trainSub[unlist(folds[k]), ]
+    pred = predict(fit_gbm, test)
+    accuracy = sum(as.numeric(pred) == as.numeric(test$classe)) / length(pred)
+    error_k = 1 - accuracy
+    error[k] = error_k
+}
+error_gbm = round(mean(error)*100, digits = 7)
+```
+
+The out of sample error estimations for boosted regression is **`r paste0(error_gbm,"%")`**. This model has much higher accuracy with a very small (near zero) error .
+
+#### Random forests (rf)
+
+```{r, rf}
+set.seed(789)
+trCtl <- trainControl(method = 'cv', number = 5, summaryFunction = defaultSummary)
+grid_rf <- expand.grid( mtry = seq(2, 40, 5))
+fit_rf <- train(classe~., data = trainSub, method = 'rf', trControl = trCtl, tuneGrid = grid_rf, verbose = FALSE)
+print(fit_rf)
+plot(fit_rf)
+###
+folds = createFolds(trainSub$classe, k = 5)
+error = rep(0, 5)
+for (k in 1:5) {
+    test = trainSub[unlist(folds[k]), ]
+    pred = predict(fit_rf, test)
+    accuracy = sum(as.numeric(pred) == as.numeric(test$classe)) / length(pred)
+    error_k = 1 - accuracy
+    error[k] = error_k
+}
+error_rf = round(mean(error)*100, digits = 7)
+```
+
+The out of sample error estimations for random forests is **`r paste0(error_rf,"%")`**. This model also has high accuracy and low (near zero) error.
+Let's compare boosted regression and random forests models, as they both perform 
+better than classification tree (rpart).
+
+```{r, plots}
+results <- resamples(list(GBM = fit_gbm, RandomForest = fit_rf))
+
+# summarize the distributions
+summary(results)
+bwplot(results)
+```
+
+## Model choice and prediction
+
+Model comparison suggests that among checked models, boosted regression perform 
+as well as random forests, with very slight differences. Boosted regression is 
+a bit faster (on the machine this report is done with parameters described above)
+than random forests which is reason good enough to choose it as the final model. 
+
+One can check the model accuracy on full (not folded) trainSub sample and 
+check out of sample error on the validSub sample:
+
+```{r,final_training}
+set.seed(333)
+grid <- expand.grid(fit_gbm$bestTune)
+model <- train(classe~., data = trainSub, method = 'gbm', tuneGrid = grid, verbose = FALSE)
+
+prediction <- predict(model, validSub)
+error = 1- sum(as.numeric(prediction) == as.numeric(validSub$classe)) / length(prediction)
+```
+
+The training model accuracy is **`r paste0(round(confusionMatrix(validSub$classe, prediction)$overall[1]*100,2),"%")`** and the out of sample error on validSub data set for this model is **`r paste0(round(error*100,2),"%")`**
+
+## Test sample prediction
+
+The final test sample prediction gives the following results:
+
+```{r,final_prediction}
+set.seed(3234)
+final_prediction <- predict(model, testingData, n.trees=200)
+final_prediction
+```
+
+The results will be written to files:
+
+```{r,text_files}
+predictions <- as.character(final_prediction)
+
+write_files <- function(x) {
+    n <- length(x)
+    for(i in 1:n) {
+        file_name <- paste0("problem_id_", i, ".txt")
+        write.table(x[i], file=file_name, quote=F, row.names=F, col.names=F)
+    }
+}
+
+# create prediction files to submit
+write_files(predictions)
+```

@@ -174,17 +174,16 @@ bwplot(results)
 ## Model choice and prediction
 
 Model comparison suggests that among checked models, boosted regression perform 
-as well as random forests, with very slight differences. Boosted regression is 
-a bit faster (on the machine this report is done with parameters described above)
-than random forests which is reason good enough to choose it as the final model. 
+as well as random forests, with very slight differences. The random forests model 
+was chosen as the final model. 
 
 One can check the model accuracy on full (not folded) trainSub sample and 
 check out of sample error on the validSub sample:
 
 ```{r,final_training}
 set.seed(333)
-grid <- expand.grid(fit_gbm$bestTune)
-model <- train(classe~., data = trainSub, method = 'gbm', tuneGrid = grid, verbose = FALSE)
+grid <- expand.grid(fit_rf$bestTune)
+model <- train(classe~., data = trainSub, method = 'rf', tuneGrid = grid, verbose = FALSE)
 
 prediction <- predict(model, validSub)
 error = 1- sum(as.numeric(prediction) == as.numeric(validSub$classe)) / length(prediction)
@@ -198,7 +197,7 @@ The final test sample prediction gives the following results:
 
 ```{r,final_prediction}
 set.seed(3234)
-final_prediction <- predict(model, testingData, n.trees=200)
+final_prediction <- predict(model, testingData)
 final_prediction
 ```
 

@@ -99,17 +99,17 @@ print(fit_rpart)
     ## Resampling results across tuning parameters:
     ## 
     ##   cp     Accuracy   Kappa    
-    ##   0.000  0.9221094  0.9014704
-    ##   0.005  0.7974106  0.7436579
-    ##   0.010  0.7321101  0.6598938
-    ##   0.015  0.6774411  0.5910279
-    ##   0.020  0.6447558  0.5505470
-    ##   0.025  0.5701381  0.4491893
-    ##   0.030  0.5344706  0.3994950
-    ##   0.035  0.5116144  0.3701184
-    ##   0.040  0.5021495  0.3546366
-    ##   0.045  0.4641444  0.2952941
-    ##   0.050  0.4394630  0.2482774
+    ##   0.000  0.9208706  0.8998540
+    ##   0.005  0.7885994  0.7321999
+    ##   0.010  0.7313820  0.6598313
+    ##   0.015  0.6760557  0.5911539
+    ##   0.020  0.6455525  0.5533435
+    ##   0.025  0.5666470  0.4453720
+    ##   0.030  0.5296688  0.3891868
+    ##   0.035  0.5065177  0.3587960
+    ##   0.040  0.5065177  0.3587960
+    ##   0.045  0.4669836  0.2937918
+    ##   0.050  0.4669836  0.2937918
     ## 
     ## Accuracy was used to select the optimal model using  the largest value.
     ## The final value used for the model was cp = 0.
@@ -134,7 +134,7 @@ for (k in 1:5) {
 error_rpart = round(mean(error)*100, digits = 2)
 ```
 
-The out of sample error estimations for classification tree is **3.87%**. This is the weakest model of all considered.
+The out of sample error estimations for classification tree is **3.73%**. This is the weakest model of all considered.
 
 #### Boosted regression (gbm)
 
@@ -158,37 +158,37 @@ print(fit_gbm)
     ## Resampling results across tuning parameters:
     ## 
     ##   n.trees  Accuracy   Kappa    
-    ##    50      0.9724099  0.9650937
-    ##    55      0.9744484  0.9676734
-    ##    60      0.9772874  0.9712656
-    ##    65      0.9793986  0.9739370
-    ##    70      0.9813641  0.9764245
-    ##    75      0.9826744  0.9780828
-    ##    80      0.9842034  0.9800177
-    ##    85      0.9851496  0.9812154
-    ##    90      0.9859505  0.9822281
-    ##    95      0.9866056  0.9830571
-    ##   100      0.9871149  0.9837016
-    ##   105      0.9874062  0.9840701
-    ##   110      0.9877701  0.9845304
-    ##   115      0.9879158  0.9847147
-    ##   120      0.9886435  0.9856356
-    ##   125      0.9885709  0.9855438
-    ##   130      0.9890803  0.9861880
-    ##   135      0.9893715  0.9865562
-    ##   140      0.9894442  0.9866484
-    ##   145      0.9900995  0.9874773
-    ##   150      0.9902448  0.9876612
-    ##   155      0.9910455  0.9886739
-    ##   160      0.9909728  0.9885821
-    ##   165      0.9913369  0.9890426
-    ##   170      0.9911912  0.9888582
-    ##   175      0.9914824  0.9892267
-    ##   180      0.9917008  0.9895030
-    ##   185      0.9918465  0.9896874
-    ##   190      0.9917736  0.9895948
-    ##   195      0.9919920  0.9898710
-    ##   200      0.9921376  0.9900552
+    ##    50      0.9725556  0.9652809
+    ##    55      0.9759041  0.9695181
+    ##    60      0.9775059  0.9715444
+    ##    65      0.9793259  0.9738492
+    ##    70      0.9815096  0.9766125
+    ##    75      0.9831111  0.9786394
+    ##    80      0.9839118  0.9796521
+    ##    85      0.9852226  0.9813097
+    ##    90      0.9863144  0.9826906
+    ##    95      0.9877702  0.9845318
+    ##   100      0.9882070  0.9850844
+    ##   105      0.9882069  0.9850844
+    ##   110      0.9886436  0.9856364
+    ##   115      0.9894445  0.9866493
+    ##   120      0.9896629  0.9869255
+    ##   125      0.9898812  0.9872016
+    ##   130      0.9903907  0.9878462
+    ##   135      0.9908274  0.9883985
+    ##   140      0.9910459  0.9886749
+    ##   145      0.9911186  0.9887669
+    ##   150      0.9914827  0.9892272
+    ##   155      0.9916282  0.9894113
+    ##   160      0.9919194  0.9897795
+    ##   165      0.9921377  0.9900559
+    ##   170      0.9923562  0.9903322
+    ##   175      0.9922834  0.9902401
+    ##   180      0.9922106  0.9901480
+    ##   185      0.9924290  0.9904243
+    ##   190      0.9922834  0.9902401
+    ##   195      0.9924291  0.9904241
+    ##   200      0.9925018  0.9905162
     ## 
     ## Tuning parameter 'interaction.depth' was held constant at a value of
     ##  10
@@ -243,17 +243,17 @@ print(fit_rf)
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  Accuracy   Kappa    
-    ##    2    0.9906094  0.9881209
-    ##    7    0.9922836  0.9902392
-    ##   12    0.9921382  0.9900557
-    ##   17    0.9915558  0.9893185
-    ##   22    0.9912646  0.9889500
-    ##   27    0.9903911  0.9878452
-    ##   32    0.9897362  0.9870159
-    ##   37    0.9888625  0.9859113
+    ##    2    0.9906094  0.9881201
+    ##    7    0.9933031  0.9915284
+    ##   12    0.9941040  0.9925413
+    ##   17    0.9930120  0.9911599
+    ##   22    0.9925753  0.9906068
+    ##   27    0.9921384  0.9900541
+    ##   32    0.9914833  0.9892255
+    ##   37    0.9908282  0.9883967
     ## 
     ## Accuracy was used to select the optimal model using  the largest value.
-    ## The final value used for the model was mtry = 7.
+    ## The final value used for the model was mtry = 12.
 
 ``` r
 plot(fit_rf)
@@ -293,13 +293,13 @@ summary(results)
     ## 
     ## Accuracy 
     ##                Min. 1st Qu. Median   Mean 3rd Qu.   Max. NA's
-    ## GBM          0.9902  0.9905 0.9913 0.9921  0.9938 0.9949    0
-    ## RandomForest 0.9902  0.9916 0.9927 0.9923  0.9934 0.9934    0
+    ## GBM          0.9909  0.9920 0.9920 0.9925  0.9934 0.9942    0
+    ## RandomForest 0.9898  0.9924 0.9956 0.9941  0.9960 0.9967    0
     ## 
     ## Kappa 
     ##                Min. 1st Qu. Median   Mean 3rd Qu.   Max. NA's
-    ## GBM          0.9876  0.9880 0.9889 0.9901  0.9922 0.9936    0
-    ## RandomForest 0.9876  0.9894 0.9908 0.9902  0.9917 0.9917    0
+    ## GBM          0.9885  0.9899 0.9899 0.9905  0.9917 0.9926    0
+    ## RandomForest 0.9871  0.9903 0.9945 0.9925  0.9949 0.9959    0
 
 ``` r
 bwplot(results)
@@ -310,20 +310,20 @@ bwplot(results)
 Model choice and prediction
 ---------------------------
 
-Model comparison suggests that among checked models, boosted regression perform as well as random forests, with very slight differences. Boosted regression is a bit faster (on the machine this report is done with parameters described above) than random forests which is reason good enough to choose it as the final model.
+Model comparison suggests that among checked models, boosted regression perform as well as random forests, with very slight differences. The random forests model was chosen as the final model.
 
 One can check the model accuracy on full (not folded) trainSub sample and check out of sample error on the validSub sample:
 
 ``` r
 set.seed(333)
-grid <- expand.grid(fit_gbm$bestTune)
-model <- train(classe~., data = trainSub, method = 'gbm', tuneGrid = grid, verbose = FALSE)
+grid <- expand.grid(fit_rf$bestTune)
+model <- train(classe~., data = trainSub, method = 'rf', tuneGrid = grid, verbose = FALSE)
 
 prediction <- predict(model, validSub)
 error = 1- sum(as.numeric(prediction) == as.numeric(validSub$classe)) / length(prediction)
 ```
 
-The training model accuracy is **99.49%** and the out of sample error on validSub data set for this model is **0.51%**
+The training model accuracy is **99.52%** and the out of sample error on validSub data set for this model is **0.48%**
 
 Test sample prediction
 ----------------------
@@ -332,7 +332,7 @@ The final test sample prediction gives the following results:
 
 ``` r
 set.seed(3234)
-final_prediction <- predict(model, testingData, n.trees=200)
+final_prediction <- predict(model, testingData)
 final_prediction
 ```
 

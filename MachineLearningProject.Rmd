@@ -2,9 +2,9 @@
 title: "Prediction of excercise quality based on personal activity data"
 author: "Julia Hoffman"
 date: "5/9/2017"
-output: 
-    md_document:
-       variant: markdown_github
+output:
+  md_document:
+    variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
@@ -199,21 +199,4 @@ The final test sample prediction gives the following results:
 set.seed(3234)
 final_prediction <- predict(model, testingData)
 final_prediction
-```
-
-The results will be written to files:
-
-```{r,text_files}
-predictions <- as.character(final_prediction)
-
-write_files <- function(x) {
-    n <- length(x)
-    for(i in 1:n) {
-        file_name <- paste0("problem_id_", i, ".txt")
-        write.table(x[i], file=file_name, quote=F, row.names=F, col.names=F)
-    }
-}
-
-# create prediction files to submit
-write_files(predictions)
 ```
